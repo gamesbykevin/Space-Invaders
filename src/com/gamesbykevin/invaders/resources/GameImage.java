@@ -10,10 +10,10 @@ import com.gamesbykevin.framework.resources.*;
 public final class GameImage extends ImageManager
 {
     //location of resources
-    private static final String DIRECTORY = "images/game/{0}.gif";
+    private static final String DIRECTORY = "images/game/{0}.png";
     
     //description for progress bar
-    private static final String DESCRIPTION = "Loading Game Image Resources";
+    private static final String DESCRIPTION = "Loading Image Resources";
     
     /**
      * These keys need to be in a specific order to match the order in the source DIRECTORY
@@ -21,6 +21,19 @@ public final class GameImage extends ImageManager
     public enum Keys
     {
         Mouse, MouseDrag, 
+        
+        ScrollMap1, ScrollMap2, ScrollMap3, ScrollMap4, 
+        ScrollMap5, ScrollMap6, ScrollMap7, ScrollMap8, 
+        ScrollMap9, ScrollMap10, ScrollMap11, ScrollMap12, 
+        ScrollMap13, 
+        
+        NoScrollMap1, NoScrollMap2, NoScrollMap3, NoScrollMap4, 
+        
+        Explosion1, Explosion2, Explosion3, 
+        
+        Enemy1, Enemy2, Enemy3, Enemy4, Enemy5, Enemy6, Enemy7, 
+        Ship, 
+        HeroMissile, EnemyFire, 
     }
     
     public GameImage() throws Exception

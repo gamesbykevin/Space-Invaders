@@ -97,7 +97,14 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
 
                 //resources are now loaded so create the menu
                 if (!resources.isLoading())
+                {
+                    //reset mouse and keyboard input
+                    mouse.reset();
+                    keyboard.reset();
+                    
+                    //create new menu
                     menu = new CustomMenu(this);
+                }
             }
             else
             {
@@ -166,6 +173,7 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
         //create new Random object
         random = new Random(seed);
         
+        //display seed
         System.out.println("Seed = " + seed);
         
         //if the manager already exists release resources

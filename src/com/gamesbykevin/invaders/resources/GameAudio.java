@@ -14,11 +14,11 @@ public final class GameAudio extends AudioManager
     private static final String DIRECTORY = "audio/game/sound/{0}.wav";
     
     //description for progress bar
-    private static final String DESCRIPTION = "Loading Game Audio Resources";
+    private static final String DESCRIPTION = "Loading Audio Resources";
     
     public enum Keys
     {
-        
+        HeroShoot, EnemyShoot, SmallExplosion, LargeExplosion
     }
     
     public GameAudio() throws Exception

@@ -72,9 +72,7 @@
         <title>Options</title>
         <backgroundMusicLocation></backgroundMusicLocation>
         <optionSoundLocation>resources/audio/menu/sound/0.wav</optionSoundLocation>
-        <options name="Resume" id="Resume">
-            <nextLayer id ="GameStart"></nextLayer>
-        </options>
+        <options name="Resume" id="Resume" next="GameStart"></options>
         <options name="Sound: " id="Sound">
             <option value="Off">Off</option>
             <option value="On">On</option>
