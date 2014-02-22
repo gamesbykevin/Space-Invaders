@@ -10,10 +10,11 @@ import com.gamesbykevin.invaders.enemy.Enemies;
 import com.gamesbykevin.invaders.engine.Engine;
 import com.gamesbykevin.invaders.explosion.Explosions;
 import com.gamesbykevin.invaders.menu.CustomMenu.*;
+import com.gamesbykevin.invaders.player.Player;
 import com.gamesbykevin.invaders.resources.GameAudio;
 import com.gamesbykevin.invaders.resources.GameImage;
 import com.gamesbykevin.invaders.resources.Resources;
-import com.gamesbykevin.invaders.ship.Ship;
+import com.gamesbykevin.invaders.player.Human;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -30,7 +31,7 @@ import java.util.Random;
 public final class Manager implements IManager
 {
     //the area where gameplay will occur
-    private Rectangle gameWindow;
+    private Rectangle window;
     
     //container for our enemies
     private Enemies enemies;
@@ -38,8 +39,8 @@ public final class Manager implements IManager
     //the background
     private Background background;
     
-    //the herp
-    private Ship ship;
+    //the hero
+    private Human human;
     
     //all the bullets in play
     private Bullets bullets;
@@ -50,6 +51,9 @@ public final class Manager implements IManager
     //all the boundaries
     private Boundaries boundaries;
     
+    //how fast to scroll the background
+    private final double BACKGROUND_SCROLL_SPEED = .8;
+    
     /**
      * Constructor for Manager, this is the point where we load any menu option configurations
      * @param engine
@@ -57,14 +61,11 @@ public final class Manager implements IManager
      */
     public Manager(final Engine engine) throws Exception
     {
-        //get the background
-        //this.background = engine.getResources().getMenuImage(MenuImage.Keys.OptionBackground);
-        
         //get the size of the screen
         Rectangle screen = engine.getMain().getScreen();
         
         //calculate the game window where game play will occur
-        this.gameWindow = new Rectangle(screen.x, screen.y, screen.width, screen.height);
+        this.window = new Rectangle(screen.x, screen.y, screen.width, screen.height);
         
         //get the menu object
         final Menu menu = engine.getMenu();
@@ -84,41 +85,76 @@ public final class Manager implements IManager
         //all the boundaries
         this.boundaries = new Boundaries();
         
-        //add 4 bounaries for now
-        this.boundaries.add(75, 380);
-        this.boundaries.add(175, 380);
-        this.boundaries.add(275, 380);
-        this.boundaries.add(375, 380);        
+        //start y coordinate for the boundaries
+        final int startY = 380;
+        final int middleX = window.x + (window.width / 2) - (Boundaries.DEFAULT_SIZE / 2);
+        
+        //add bounaries
+        this.boundaries.add(middleX - 200, startY);
+        this.boundaries.add(middleX - 100, startY);
+        this.boundaries.add(middleX,       startY);
+        this.boundaries.add(middleX + 100, startY);
+        this.boundaries.add(middleX + 200, startY);
         
         //add enemies
         this.enemies.add(engine.getRandom(), engine.getResources(), 75, 45, 6, 4);
         
+        //temp list for picking a random background
         List<GameImage.Keys> keys = new ArrayList<>();
-        keys.add(GameImage.Keys.ScrollMap1);
-        keys.add(GameImage.Keys.ScrollMap2);
-        keys.add(GameImage.Keys.ScrollMap3);
-        keys.add(GameImage.Keys.ScrollMap4);
-        keys.add(GameImage.Keys.ScrollMap5);
-        keys.add(GameImage.Keys.ScrollMap6);
-        keys.add(GameImage.Keys.ScrollMap7);
-        keys.add(GameImage.Keys.ScrollMap8);
-        keys.add(GameImage.Keys.ScrollMap9);
-        keys.add(GameImage.Keys.ScrollMap10);
-        keys.add(GameImage.Keys.ScrollMap11);
-        keys.add(GameImage.Keys.ScrollMap12);
-        keys.add(GameImage.Keys.ScrollMap13);
         
+        //do we scroll the background
+        final boolean scroll;
+        
+        //add backgrounds to list and pick one at random
+        if (engine.getRandom().nextBoolean())
+        {
+            //scroll
+            scroll = true;
+            
+            //add random scrolling map
+            keys.add(GameImage.Keys.ScrollMap1);
+            keys.add(GameImage.Keys.ScrollMap2);
+            keys.add(GameImage.Keys.ScrollMap3);
+            keys.add(GameImage.Keys.ScrollMap4);
+            keys.add(GameImage.Keys.ScrollMap5);
+            keys.add(GameImage.Keys.ScrollMap6);
+        }
+        else
+        {
+            //do not scroll
+            scroll = false;
+            
+            //add random non-scrolling map
+            keys.add(GameImage.Keys.NoScrollMap1);
+            keys.add(GameImage.Keys.NoScrollMap2);
+            keys.add(GameImage.Keys.NoScrollMap3);
+        }
+        
+        //pick random key
         GameImage.Keys key = keys.get(engine.getRandom().nextInt(keys.size()));
         
-        this.background = new Background(engine.getResources().getGameImage(key), gameWindow.getWidth(), gameWindow.getHeight(), 0.75);
+        //create new background
+        this.background = new Background(engine.getResources().getGameImage(key), window.getWidth(), window.y + window.height);
         
-        this.ship = new Ship(engine.getResources().getGameImage(GameImage.Keys.Ship));
-        this.ship.setLocation(gameWindow.width / 2, gameWindow.height - (ship.getHeight() / 2));
+        if (scroll)
+        {
+            //do we scroll the background
+            this.background.setScroll(scroll);
+
+            //set the background scroll speed
+            this.background.setScrollSpeed(BACKGROUND_SCROLL_SPEED);
+        }
+        
+        //create ship
+        this.human = new Human(engine.getResources().getGameImage(GameImage.Keys.Ship));
+        
+        //ship will be placed behind boundary
+        this.human.setLocation(window.x + (window.width / 2), window.y + window.height - (human.getHeight() / 2));
     }
     
-    public Ship getShip()
+    public Player getPlayer()
     {
-        return this.ship;
+        return this.human;
     }
     
     public Boundaries getBoundaries()
@@ -145,9 +181,9 @@ public final class Manager implements IManager
      * Get the game window
      * @return The Rectangle where game play will take place
      */
-    public Rectangle getGameWindow()
+    public Rectangle getWindow()
     {
-        return this.gameWindow;
+        return this.window;
     }
     
     /**
@@ -162,10 +198,10 @@ public final class Manager implements IManager
         background.dispose();
         background = null;
         
-        gameWindow = null;
+        window = null;
         
-        ship.dispose();
-        ship = null;
+        human.dispose();
+        human = null;
     
         bullets.dispose();
         bullets = null;
@@ -186,16 +222,22 @@ public final class Manager implements IManager
     @Override
     public void update(final Engine engine) throws Exception
     {
+        //update
         enemies.update(engine);
         
-        background.update();
+        //update
+        background.update(engine.getMain().getScreen().y + engine.getMain().getScreen().height);
         
-        ship.update(engine);
+        //update
+        human.update(engine);
         
+        //update
         bullets.update(engine);
         
+        //update
         explosions.update(engine);
         
+        //update
         boundaries.update(engine);
     }
     
@@ -206,17 +248,26 @@ public final class Manager implements IManager
     @Override
     public void render(final Graphics graphics)
     {
-        background.draw(graphics);
+        //draw background first
+        background.render(graphics);
         
+        //then bullets
         bullets.render(graphics);
         
+        //then enemies
         enemies.render(graphics);
         
-        if (!ship.isDead())
-            ship.render(graphics);
+        //only draw if not dead
+        if (!human.isDead())
+        {
+            //draw ship
+            human.render(graphics);
+        }
         
+        //draw the protection boundaries
         boundaries.render(graphics);
         
+        //finally draw the explosions
         explosions.render(graphics);
     }
 }

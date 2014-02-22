@@ -22,12 +22,10 @@ public final class GameImage extends ImageManager
     {
         Mouse, MouseDrag, 
         
-        ScrollMap1, ScrollMap2, ScrollMap3, ScrollMap4, 
-        ScrollMap5, ScrollMap6, ScrollMap7, ScrollMap8, 
-        ScrollMap9, ScrollMap10, ScrollMap11, ScrollMap12, 
-        ScrollMap13, 
+        ScrollMap1, ScrollMap2, ScrollMap3, 
+        ScrollMap4, ScrollMap5, ScrollMap6, 
         
-        NoScrollMap1, NoScrollMap2, NoScrollMap3, NoScrollMap4, 
+        NoScrollMap1, NoScrollMap2, NoScrollMap3, 
         
         Explosion1, Explosion2, Explosion3, 
         

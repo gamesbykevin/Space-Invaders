@@ -1,7 +1,6 @@
 package com.gamesbykevin.invaders.bullet;
 
 import com.gamesbykevin.invaders.engine.Engine;
-import com.gamesbykevin.invaders.explosion.Explosions;
 import com.gamesbykevin.invaders.resources.GameAudio;
 import com.gamesbykevin.invaders.resources.Resources;
 import com.gamesbykevin.invaders.shared.IElement;
@@ -9,7 +8,6 @@ import com.gamesbykevin.invaders.shared.IElement;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public final class Bullets implements IElement
 {
@@ -122,16 +120,16 @@ public final class Bullets implements IElement
                     if (engine.getManager().getBoundaries().hitBoundary(bullet))
                         collision = true;
                     
-                    if (engine.getManager().getShip().getDistance(bullet) < (engine.getManager().getShip().getWidth() / 4))
+                    if (engine.getManager().getPlayer().getDistance(bullet) < (engine.getManager().getPlayer().getWidth() / 4))
                     {
                         //make sure ship isn't already dead
-                        if (!engine.getManager().getShip().isDead())
+                        if (!engine.getManager().getPlayer().isDead())
                         {
                             //flag as dead
-                            engine.getManager().getShip().setDead(true);
+                            engine.getManager().getPlayer().setDead(true);
 
                             //set the bullet to be where the ship is
-                            bullet.setLocation(engine.getManager().getShip());
+                            bullet.setLocation(engine.getManager().getPlayer());
                             
                             //we have a collision
                             collision = true;

@@ -5,7 +5,7 @@ import com.gamesbykevin.invaders.resources.GameImage;
 
 import java.awt.Image;
 
-public class Bullet extends Entity
+public final class Bullet extends Entity
 {
     public enum Type
     {

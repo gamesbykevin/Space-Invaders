@@ -14,7 +14,7 @@ public final class Boundaries implements IElement
     private List<Boundary> boundaries;
     
     //the size of the boundary
-    private static final int DEFAULT_SIZE = 50;
+    public static final int DEFAULT_SIZE = 50;
     
     public Boundaries()
     {

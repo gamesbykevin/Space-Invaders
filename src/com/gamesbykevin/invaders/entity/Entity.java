@@ -47,6 +47,11 @@ public abstract class Entity extends Sprite
             getSpriteSheet().setCurrent(key);
     }
     
+    /**
+     * Update the current animation and location of the entity
+     * @param time Time per update in nano seconds
+     * @throws Exception 
+     */
     public void update(final long time) throws Exception
     {
         //update location

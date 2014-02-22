@@ -32,6 +32,11 @@ public final class Enemies implements IElement
         this.enemies = new ArrayList<>();
     }
     
+    /**
+     * Here we detect collision. <br>If there is collision the enemy will be removed from the collection.
+     * @param bullet The bullet object we are using to test collision
+     * @return true if the bullet hit an enemy, false otherwise
+     */
     public boolean hitEnemy(final Bullet bullet)
     {
         for (int i=0; i < enemies.size(); i++)
