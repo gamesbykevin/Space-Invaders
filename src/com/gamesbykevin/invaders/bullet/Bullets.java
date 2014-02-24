@@ -4,6 +4,7 @@ import com.gamesbykevin.invaders.engine.Engine;
 import com.gamesbykevin.invaders.resources.GameAudio;
 import com.gamesbykevin.invaders.resources.Resources;
 import com.gamesbykevin.invaders.shared.IElement;
+import com.gamesbykevin.invaders.ship.Ship;
 
 import java.awt.Graphics;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public final class Bullets implements IElement
     private List<Bullet> bullets;
     
     //default speed the enemies move
-    private static final double DEFAULT_MOVE_SPEED = 4;
+    public static final double DEFAULT_MOVE_SPEED = 4;
     
     public Bullets()
     {
@@ -33,6 +34,14 @@ public final class Bullets implements IElement
         
         this.bullets.clear();
         this.bullets = null;
+    }
+    
+    /**
+     * Remove all bullets from list
+     */
+    public void reset()
+    {
+        this.bullets.clear();
     }
     
     public void add(final Bullet.Type type, final double x, final double y, final Resources resources)
@@ -56,6 +65,30 @@ public final class Bullets implements IElement
         
         //add to list
         bullets.add(bullet);
+    }
+    
+    /**
+     * Check if any of the enemy fire bullets are aimed towards the current ships location and within a certain distance.
+     * @param ship The ship we want to avoid the bullet
+     * @return true if the ship is at risk being hit by a bullet, false otherwise
+     */
+    public boolean hasDanger(final Ship ship)
+    {
+        for (Bullet bullet : bullets)
+        {
+            //we don't need to check hero fire
+            if (bullet.getType() == Bullet.Type.HeroMissile)
+                continue;
+            
+            //calculate the distance
+            final double distance = bullet.getDistance(ship);
+            
+            //if the bullet is close enough to the ship return true;
+            if (distance <= ship.getWidth())
+                return true;
+        }
+        
+        return false;
     }
     
     public int getBulletCount(final Bullet.Type type)
@@ -88,7 +121,7 @@ public final class Bullets implements IElement
             Bullet bullet = bullets.get(i);
             
             //if the bullet is no longer on the screen
-            if (!engine.getMain().getScreen().contains(bullets.get(i).getPoint()))
+            if (!engine.getManager().getWindow().contains(bullets.get(i).getPoint()))
             {
                 //remove it
                 bullets.remove(i);
@@ -120,23 +153,13 @@ public final class Bullets implements IElement
                     if (engine.getManager().getBoundaries().hitBoundary(bullet))
                         collision = true;
                     
-                    if (engine.getManager().getPlayer().getDistance(bullet) < (engine.getManager().getPlayer().getWidth() / 4))
+                    if (engine.getManager().getPlayers().hasCollision(bullet))
                     {
-                        //make sure ship isn't already dead
-                        if (!engine.getManager().getPlayer().isDead())
-                        {
-                            //flag as dead
-                            engine.getManager().getPlayer().setDead(true);
+                        //we have a collision
+                        collision = true;
 
-                            //set the bullet to be where the ship is
-                            bullet.setLocation(engine.getManager().getPlayer());
-                            
-                            //we have a collision
-                            collision = true;
-                            
-                            //ship has different explosion
-                            key = GameAudio.Keys.LargeExplosion;
-                        }
+                        //ship has different explosion
+                        key = GameAudio.Keys.LargeExplosion;
                     }
                     break;
             }
@@ -165,6 +188,10 @@ public final class Bullets implements IElement
         }
     }
     
+    /**
+     * Draw our bullets
+     * @param graphics 
+     */
     @Override
     public void render(final Graphics graphics)
     {

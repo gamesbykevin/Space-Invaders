@@ -1,7 +1,6 @@
 package com.gamesbykevin.invaders.manager;
 
 import com.gamesbykevin.framework.menu.Menu;
-import com.gamesbykevin.framework.util.*;
 
 import com.gamesbykevin.invaders.background.Background;
 import com.gamesbykevin.invaders.boundary.Boundaries;
@@ -10,19 +9,15 @@ import com.gamesbykevin.invaders.enemy.Enemies;
 import com.gamesbykevin.invaders.engine.Engine;
 import com.gamesbykevin.invaders.explosion.Explosions;
 import com.gamesbykevin.invaders.menu.CustomMenu.*;
-import com.gamesbykevin.invaders.player.Player;
+import com.gamesbykevin.invaders.player.Players;
 import com.gamesbykevin.invaders.resources.GameAudio;
 import com.gamesbykevin.invaders.resources.GameImage;
 import com.gamesbykevin.invaders.resources.Resources;
-import com.gamesbykevin.invaders.player.Human;
 
-import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * The parent class that contains all of the game elements
@@ -39,11 +34,11 @@ public final class Manager implements IManager
     //the background
     private Background background;
     
-    //the hero
-    private Human human;
-    
     //all the bullets in play
     private Bullets bullets;
+    
+    //the players in the game
+    private Players players;
     
     //all the game explosions
     private Explosions explosions;
@@ -73,6 +68,9 @@ public final class Manager implements IManager
         //determine what mode is being played
         //this.mode = Mode.Selections.values()[menu.getOptionSelectionIndex(LayerKey.Options, OptionKey.Mode)];
         
+        //create our players
+        this.players = new Players(engine.getResources().getGameImage(GameImage.Keys.Ship), window);
+        
         //create our list of bullets
         this.bullets = new Bullets();
         
@@ -97,7 +95,7 @@ public final class Manager implements IManager
         this.boundaries.add(middleX + 200, startY);
         
         //add enemies
-        this.enemies.add(engine.getRandom(), engine.getResources(), 75, 45, 6, 4);
+        this.enemies.reset(engine.getRandom(), engine.getResources(), 75, 45, 6, 4);
         
         //temp list for picking a random background
         List<GameImage.Keys> keys = new ArrayList<>();
@@ -145,16 +143,11 @@ public final class Manager implements IManager
             this.background.setScrollSpeed(BACKGROUND_SCROLL_SPEED);
         }
         
-        //create ship
-        this.human = new Human(engine.getResources().getGameImage(GameImage.Keys.Ship));
-        
-        //ship will be placed behind boundary
-        this.human.setLocation(window.x + (window.width / 2), window.y + window.height - (human.getHeight() / 2));
     }
     
-    public Player getPlayer()
+    public Players getPlayers()
     {
-        return this.human;
+        return this.players;
     }
     
     public Boundaries getBoundaries()
@@ -192,17 +185,17 @@ public final class Manager implements IManager
     @Override
     public void dispose()
     {
+        window = null;
+        
         enemies.dispose();
         enemies = null;
         
         background.dispose();
         background = null;
         
-        window = null;
+        players.dispose();
+        players = null;
         
-        human.dispose();
-        human = null;
-    
         bullets.dispose();
         bullets = null;
         
@@ -222,14 +215,24 @@ public final class Manager implements IManager
     @Override
     public void update(final Engine engine) throws Exception
     {
+        //if all of the enemies are destroyed
+        if (!enemies.hasEnemies())
+        {
+            //remove all bullets
+            this.bullets.reset();
+            
+            //add more enemies
+            this.enemies.reset(engine.getRandom(), engine.getResources(), 75, 45, 6, 4);
+        }
+        
         //update
         enemies.update(engine);
         
         //update
-        background.update(engine.getMain().getScreen().y + engine.getMain().getScreen().height);
+        background.update(engine.getManager().getWindow().y + engine.getManager().getWindow().height);
         
         //update
-        human.update(engine);
+        players.update(engine);
         
         //update
         bullets.update(engine);
@@ -257,12 +260,8 @@ public final class Manager implements IManager
         //then enemies
         enemies.render(graphics);
         
-        //only draw if not dead
-        if (!human.isDead())
-        {
-            //draw ship
-            human.render(graphics);
-        }
+        //then ships
+        players.render(graphics);
         
         //draw the protection boundaries
         boundaries.render(graphics);

@@ -1,6 +1,5 @@
 package com.gamesbykevin.invaders.ship;
 
-import com.gamesbykevin.invaders.engine.Engine;
 import com.gamesbykevin.invaders.entity.Entity;
 
 import java.awt.Rectangle;
@@ -98,13 +97,18 @@ public abstract class Ship extends Entity
     }
     
     /**
-     * Update timer and animation
+     * Update timer/animation. <br>Also, ensure we are within game window.
+     * @param window The window of game play
      * @param time Time per each frame in nano seconds
      */
-    protected void updateTimer(final long time)
+    protected void update(final Rectangle window, final long time)
     {
         try
         {
+            //make sure ship is within game window
+            checkBounds(window);
+            
+            //update timer animation
             super.update(time);
         }
         catch(Exception e)
@@ -112,10 +116,4 @@ public abstract class Ship extends Entity
             e.printStackTrace();
         }
     }
-    
-    /**
-     * Each class that inherits the ship must implement their own logic during the update
-     * @param engine Game engine object
-     */
-    protected abstract void update(final Engine engine);
 }

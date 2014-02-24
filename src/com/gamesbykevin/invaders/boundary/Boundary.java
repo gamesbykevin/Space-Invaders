@@ -24,16 +24,49 @@ public final class Boundary extends Entity
         //create list that will contains points in the boundary
         this.points = new ArrayList<>();
         
+        //fill in all boundary points
+        reset();
+    }
+    
+    /**
+     * Reset the boundary by adding all points in the boundary area
+     */
+    protected void reset()
+    {
+        this.points.clear();
+        
         //add all the points that make our boundary
-        for (double x = getX(); x <= getX() + width; x++)
+        for (double x = getX(); x <= getX() + getWidth(); x++)
         {
-            for (double y = getY(); y <= getY() + height; y++)
+            for (double y = getY(); y <= getY() + getHeight(); y++)
             {
                 this.points.add(new Point((int)x, (int)y));
             }
         }
     }
     
+    /**
+     * Do any of the points lie on the specified x coordinate
+     * @param x x-coordinate we want to check
+     * @return true if 1 point has the matching x coordinate, false otherwise
+     */
+    protected boolean hasBoundary(final int x)
+    {
+        for (Point p : points)
+        {
+            if (p.x == x)
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if the bullet has hit the boundary.<br>
+     * If so remove all points in the boundary that have hit the bullet
+     * @param bullet The bullet we want to check
+     * @return true if the bullet hit the boundary, false otherwise
+     */
     public boolean hasCollision(final Bullet bullet)
     {
         //did we hit anything

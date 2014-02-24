@@ -5,7 +5,6 @@ import com.gamesbykevin.framework.resources.Disposable;
 import com.gamesbykevin.invaders.engine.Engine;
 
 import java.awt.Graphics;
-import java.awt.Image;
 
 /**
  * Basic methods required for game elementsMethods needed for game elements

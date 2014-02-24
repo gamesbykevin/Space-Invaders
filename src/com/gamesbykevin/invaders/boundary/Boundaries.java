@@ -21,6 +21,17 @@ public final class Boundaries implements IElement
         this.boundaries = new ArrayList<>();
     }
     
+    /**
+     * Re-fill all boundaries
+     */
+    public void reset()
+    {
+        for (Boundary boundary : boundaries)
+        {
+            boundary.reset();
+        }
+    }
+    
     @Override
     public void dispose()
     {
@@ -41,6 +52,24 @@ public final class Boundaries implements IElement
         
         //add to list
         boundaries.add(boundary);
+    }
+    
+    /**
+     * Is there a boundary at coordinate x?
+     * @param x x-coordinate where we want to check if boundary exists
+     * @return true if a boundary is at the x-coordinate regardless of y-coordinate
+     */
+    public boolean hasBoundary(final int x)
+    {
+        for (Boundary boundary : boundaries)
+        {
+            //we found one
+            if (boundary.hasBoundary(x))
+                return true;
+        }
+        
+        //we do not have a boundary a coordinate x
+        return false;
     }
     
     public boolean hitBoundary(final Bullet bullet)
