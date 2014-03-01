@@ -110,7 +110,10 @@ public final class Main extends Thread
         double deltaUpdate = 0;
         double deltaFrame = 0;
         
-        while(true)
+        //to keep our game loop active
+        boolean active = true;
+        
+        while(active)
         {
             try
             {
@@ -159,21 +162,33 @@ public final class Main extends Thread
                     frames = 0;
                 }
                 
-                //sleep for 1,000 nanoseconds by default to give our thread a short break
-                Thread.sleep(0, 1000);
+                //sleep for 500 nanoseconds by default to give our thread a short break
+                Thread.sleep(0, 500);
             }
             catch(Exception e)
             {
+                //display error
                 e.printStackTrace();
+                
+                //no longer active if game error occurs
+                active = false;
             }
         }
     }
     
+    /**
+     * Set reference to our applet container
+     * @param applet 
+     */
     public void setApplet(final JApplet applet)
     {
         this.applet = applet;
     }
     
+    /**
+     * Set reference to our panel container
+     * @param panel 
+     */
     public void setPanel(final JPanel panel)
     {
         this.panel = panel;
@@ -225,11 +240,6 @@ public final class Main extends Thread
         return this.originalSizeWindow;
     }
     
-    public Rectangle getFullScreen()
-    {
-        return this.fullSizeWindow;
-    }
-    
     /**
      * This method will be called whenever the user turns full-screen on/off
      */
@@ -252,9 +262,8 @@ public final class Main extends Thread
     }
     
     /**
-     * Gets the number of nanoseconds between each update
-     * 
-     * @return long The nanosecond duration between each update
+     * Get the number of nanoseconds per each update.
+     * @return long The nanosecond duration per each update which is based on updates per second.
      */
     public long getTime()
     {

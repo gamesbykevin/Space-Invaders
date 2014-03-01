@@ -11,7 +11,7 @@ public final class Human extends Player
 {
     public Human(final Image image)
     {
-        super(image);
+        super(image, true);
     }
     
     @Override
@@ -19,15 +19,6 @@ public final class Human extends Player
     {
         //update timer/animation and check boundary
         super.update(engine.getManager().getWindow(), engine.getMain().getTime());
-        
-        if (engine.getKeyboard().hasKeyReleased(KeyEvent.VK_LEFT) || engine.getKeyboard().hasKeyReleased(KeyEvent.VK_RIGHT))
-        {
-            //reset key events
-            engine.getKeyboard().reset();
-            
-            //reset animation
-            resetAnimation();
-        }
         
         if (engine.getKeyboard().hasKeyPressed(KeyEvent.VK_SPACE))
         {
@@ -37,6 +28,15 @@ public final class Human extends Player
             
             //reset key events
             engine.getKeyboard().reset();
+        }
+        
+        if (engine.getKeyboard().hasKeyReleased(KeyEvent.VK_LEFT) || engine.getKeyboard().hasKeyReleased(KeyEvent.VK_RIGHT))
+        {
+            //reset key events
+            engine.getKeyboard().reset();
+            
+            //reset animation
+            resetAnimation();
         }
         
         if (engine.getKeyboard().hasKeyPressed(KeyEvent.VK_LEFT))

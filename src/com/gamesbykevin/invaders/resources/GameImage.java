@@ -22,16 +22,16 @@ public final class GameImage extends ImageManager
     {
         Mouse, MouseDrag, 
         
-        ScrollMap1, ScrollMap2, ScrollMap3, 
-        ScrollMap4, ScrollMap5, ScrollMap6, 
+        ScrollMap1, ScrollMap2, ScrollMap3, ScrollMap4, ScrollMap5,  
         
-        NoScrollMap1, NoScrollMap2, NoScrollMap3, 
+        NoScrollMap1, NoScrollMap2, 
         
         Explosion1, Explosion2, Explosion3, 
         
         Enemy1, Enemy2, Enemy3, Enemy4, Enemy5, Enemy6, Enemy7, 
         Ship, 
         HeroMissile, EnemyFire, 
+        CpuShip,
     }
     
     public GameImage() throws Exception

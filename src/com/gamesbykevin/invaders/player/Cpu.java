@@ -5,7 +5,7 @@ import com.gamesbykevin.invaders.bullet.Bullets;
 import com.gamesbykevin.invaders.enemy.Enemies;
 import com.gamesbykevin.invaders.enemy.Enemy;
 import com.gamesbykevin.invaders.engine.Engine;
-import com.gamesbykevin.invaders.resources.Resources;
+import com.gamesbykevin.invaders.manager.Manager.Mode;
 
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -27,7 +27,7 @@ public final class Cpu extends Player
     
     public Cpu(final Image image)
     {
-        super(image);
+        super(image, false);
     }
     
     private void setTarget(final long target)
@@ -50,7 +50,6 @@ public final class Cpu extends Player
         return (getTarget() > 0);
     }
     
-    
     /**
      * Get the east most x coordinate we want our ship to move to
      * @param window Game area
@@ -58,7 +57,7 @@ public final class Cpu extends Player
      */
     private int getEastX(final Rectangle window)
     {
-        return (window.x + window.width - (int)getWidth());
+        return (window.x + window.width);// - (int)getWidth());
     }
     
     /**
@@ -68,7 +67,7 @@ public final class Cpu extends Player
      */
     private int getWestX(final Rectangle window)
     {
-        return (window.x + (int)getWidth());
+        return (window.x);// + (int)getWidth());
     }
     
     /**
@@ -173,7 +172,7 @@ public final class Cpu extends Player
             //stop moving
             resetVelocity();
             
-            //if the destination is outside of the game window locate new target
+            //if the destination is outside of the area locate new target
             if (destinationX <= getWestX(window) || destinationX >= getEastX(window))
             {
                 //locate a new target
@@ -192,10 +191,10 @@ public final class Cpu extends Player
                 //don't continue any more because we will need to do another calculation
                 return;
             }
-        }
 
-        //we found our destination so don't calculate again
-        calculate = false;
+            //we found our destination so don't calculate again
+            this.calculate = false;
+        }
     }
     
     /**
@@ -209,6 +208,14 @@ public final class Cpu extends Player
         if (distanceX < 0)
             distanceX = -distanceX;
 
+        //if we need to move right
+        if (getX() < destinationX)
+            turnRight();
+
+        //if we need to move left
+        if (getX() > destinationX)
+            turnLeft();
+        
         //if the distance is less than move speed
         if (distanceX < DEFAULT_MOVE_SPEED)
         {
@@ -217,15 +224,10 @@ public final class Cpu extends Player
 
             //locate a new destination
             calculate = true;
+            
+            //stop moving
+            resetVelocity();
         }
-
-        //if we need to move right
-        if (getX() < destinationX)
-            turnRight();
-
-        //if we need to move left
-        if (getX() > destinationX)
-            turnLeft();
     }
     
     @Override
@@ -238,7 +240,7 @@ public final class Cpu extends Player
         //update timer/animation and check boundary
         super.update(engine.getManager().getWindow(), engine.getMain().getTime());
         
-        //if there is a bullet that could threaten the ship, avoid the bullet will be the highest priority
+        //if there is a bullet that could threaten the ship, avoiding the bullet will be the highest priority
         if (engine.getManager().getBullets().hasDanger(this))
         {
             //attempt to dodge enemy fire
@@ -248,18 +250,22 @@ public final class Cpu extends Player
             return;
         }
         
-        //if the ship fired a projectile from the current location will it hit an enemy
-        if (engine.getManager().getEnemies().hasShot(this))
+        //only shoot when there is an opportunity for cooperative mode, in race mode only shoot when at destination
+        if (engine.getManager().getMode() == Mode.Cooperative)
         {
-            //also make sure that we aren't firing at our boundaries
-            if (!engine.getManager().getBoundaries().hasBoundary((int)getX()))
+            //if the ship fired a projectile from the current location will it hit an enemy
+            if (engine.getManager().getEnemies().hasShot(this))
             {
-                //if we can shoot fire bullet
-                if (canShoot(engine.getManager().getBullets()))
+                //also make sure that we aren't firing at our boundaries
+                if (!engine.getManager().getBoundaries().hasBoundary((int)getX()))
                 {
-                    //fire bullet
-                    fireBullet(engine.getManager().getBullets(), engine.getResources());
-                    return;
+                    //if we can shoot fire bullet
+                    if (canShoot(engine.getManager().getBullets()))
+                    {
+                        //fire bullet
+                        fireBullet(engine.getManager().getBullets(), engine.getResources());
+                        return;
+                    }
                 }
             }
         }
@@ -276,9 +282,13 @@ public final class Cpu extends Player
             //if we are at our destination
             if (getX() == destinationX)
             {
-                //if we can shoot fire bullet
-                if (canShoot(engine.getManager().getBullets()))
-                    fireBullet(engine.getManager().getBullets(), engine.getResources());
+                //also make sure that we aren't firing at our boundaries
+                if (!engine.getManager().getBoundaries().hasBoundary((int)getX()))
+                {
+                    //if we can shoot fire bullet
+                    if (canShoot(engine.getManager().getBullets()))
+                        fireBullet(engine.getManager().getBullets(), engine.getResources());
+                }
             }
         }
     }

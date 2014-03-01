@@ -29,8 +29,8 @@ public final class CustomMenu extends Menu implements IElement
      * identify each option we want to access, spelling should match the options id=? in the .xml file
      */
     public enum OptionKey 
-    { 
-        Sound, FullScreen;
+    {
+        Sound, FullScreen, Mode, Difficulty, Lives 
     }
     
     /**
@@ -39,15 +39,15 @@ public final class CustomMenu extends Menu implements IElement
     public enum LayerKey 
     {
         Initial, Credits, MainTitle, Options, OptionsInGame, NewGameConfirm, 
-        ExitGameConfirm, NoFocus, GameStart, CreateNewGame, Controls, Instructions; 
+        ExitGameConfirm, NoFocus, GameStart, CreateNewGame, Controls, Instructions 
     }
     
     /**
-     * Basic Option Selection Constants
+     * Basic option selection on/off, must match text in menu.xml to work properly
      */
     public enum Toggle
     {
-        Off, On
+        Off, On 
     }
     
     //is sound enabled, default true

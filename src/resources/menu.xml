@@ -5,25 +5,25 @@
         <force>false</force>
         <pause>false</pause>
         <duration>2500</duration>
-        <image>resources/images/menu/0.gif</image>
+        <image>resources/images/menu/title.gif</image>
     </layer>
     <layer id="Credits" next="MainTitle">
         <transition>SCROLL_VERTICAL_NORTH</transition>
         <force>false</force>
         <pause>false</pause>
         <duration>5000</duration>
-        <image>resources/images/menu/1.gif</image>
+        <image>resources/images/menu/credits.gif</image>
     </layer>
     <layer id="MainTitle">
         <transition>SCROLL_HORIZONTAL_WEST_REPEAT</transition>
         <force>false</force>
         <pause>true</pause>
         <duration>10000</duration>
-        <image>resources/images/menu/3.gif</image>
+        <image>resources/images/menu/background.gif</image>
         <optionContainerRatio>0.80</optionContainerRatio>
         <title>Space Invaders</title>
         <backgroundMusicLocation></backgroundMusicLocation>
-        <optionSoundLocation>resources/audio/menu/sound/0.wav</optionSoundLocation>
+        <optionSoundLocation>resources/audio/menu/sound/optionSelection.wav</optionSoundLocation>
         <options name="Start Game" next="GameStart" id="GameStart"></options>
         <options name="Options" next="Options" id="Options"></options>
         <options name="Controls" next="Controls" id="Controls"></options>
@@ -35,14 +35,32 @@
         <force>false</force>
         <pause>true</pause>
         <duration>10000</duration>
-        <image>resources/images/menu/3.gif</image>
+        <image>resources/images/menu/background.gif</image>
         <optionContainerRatio>0.80</optionContainerRatio>
         <title>Options</title>
         <backgroundMusicLocation></backgroundMusicLocation>
-        <optionSoundLocation>resources/audio/menu/sound/0.wav</optionSoundLocation>
+        <optionSoundLocation>resources/audio/menu/sound/optionSelection.wav</optionSoundLocation>
+        <options name="Mode: " id="Mode">
+            <option>Single Player</option>
+            <option>Cooperative</option>
+            <option>Race</option>
+        </options>
+        <options name="Difficulty: " id="Difficulty">
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+            <option>Harder</option>
+            <option>Hardest</option>
+        </options>
+        <options name="Lives: " id="Lives">
+            <option>3</option>
+            <option>5</option>
+            <option>7</option>
+            <option>30</option>
+        </options>
         <options name="Full Screen: " id="FullScreen">
-            <option value="Off">Off</option>
-            <option value="On">On</option>
+            <option>Off</option>
+            <option>On</option>
         </options>
         <options name="Go Back" next="MainTitle" id="MainTitle"></options>
     </layer>
@@ -51,14 +69,21 @@
         <force>false</force>
         <pause>true</pause>
         <duration></duration>
-        <image>resources/images/menu/7.gif</image>
+        <image>resources/images/menu/controls.gif</image>
     </layer>
-    <layer id="Instructions" next="MainTitle">
+    <layer id="Instructions" next="Instructions2">
         <transition></transition>
         <force>false</force>
         <pause>true</pause>
         <duration></duration>
-        <image>resources/images/menu/8.gif</image>
+        <image>resources/images/menu/instructions.gif</image>
+    </layer>
+    <layer id="Instructions2" next="MainTitle">
+        <transition></transition>
+        <force>false</force>
+        <pause>true</pause>
+        <duration></duration>
+        <image>resources/images/menu/instructions2.gif</image>
     </layer>
     <layer id="GameStart">
     </layer>
@@ -71,15 +96,15 @@
         <optionContainerRatio>0.80</optionContainerRatio>
         <title>Options</title>
         <backgroundMusicLocation></backgroundMusicLocation>
-        <optionSoundLocation>resources/audio/menu/sound/0.wav</optionSoundLocation>
+        <optionSoundLocation>resources/audio/menu/sound/optionSelection.wav</optionSoundLocation>
         <options name="Resume" id="Resume" next="GameStart"></options>
         <options name="Sound: " id="Sound">
-            <option value="Off">Off</option>
-            <option value="On">On</option>
+            <option>Off</option>
+            <option>On</option>
         </options>
         <options name="Full Screen: " id="FullScreen">
-            <option value="Off">Off</option>
-            <option value="On">On</option>
+            <option>Off</option>
+            <option>On</option>
         </options>
         <options name="New Game" next="NewGameConfirm" id="NewGameConfirm"></options>
         <options name="Exit Game" next="ExitGameConfirm" id="ExitGameConfirm"></options>
@@ -113,6 +138,6 @@
         <force>false</force>
         <pause>true</pause>
         <duration></duration>
-        <image>resources/images/menu/2.gif</image>
+        <image>resources/images/menu/NoFocus.gif</image>
     </layer>
 </menu>

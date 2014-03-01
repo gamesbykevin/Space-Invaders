@@ -10,6 +10,7 @@ import com.gamesbykevin.invaders.shared.IElement;
 
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,14 +23,36 @@ public final class Enemies implements IElement
     //our temporary list used to choose a target
     private List<Enemy> tmp;
     
-    //default speed the enemies move
-    public static final double DEFAULT_MOVE_SPEED = .5;
+    //the speed at which the enemies move
+    private double speed;
     
-    //how many bullets is the enemy allowed to fire
-    private static final int BULLET_LIMIT = 2;
+    //different vairables for the difficulties
+    private final double SPEED_EASY     = .2;
+    private final double SPEED_MEDIUM   = .5;
+    private final double SPEED_HARD     = .8;
+    private final double SPEED_HARDER   = .9;
+    private final double SPEED_HARDEST  = 1;
+    
+    //the total number of bullets allowed at once
+    private int bulletLimit;
+    
+    //different vairables for the difficulties
+    private final int BULLET_LIMIT_EASY     = 1;
+    private final int BULLET_LIMIT_MEDIUM   = 3;
+    private final int BULLET_LIMIT_HARD     = 5;
+    private final int BULLET_LIMIT_HARDER   = 6;
+    private final int BULLET_LIMIT_HARDEST  = 7;
+    
+    /**
+     * The amount of hits to destroy the boss
+     */
+    protected static final int DEFAULT_BOSS_HEALTH = 10;
     
     //do we move east, if not we move west
     private boolean east = true;
+    
+    //the the enemy hits a wall do they move forwards
+    private boolean forward = true;
     
     public Enemies()
     {
@@ -38,6 +61,54 @@ public final class Enemies implements IElement
         
         //create new temp list for the enemies
         this.tmp = new ArrayList<>();
+        
+    }
+    
+    public void setDifficulty(final int difficultyIndex)
+    {
+        //difficulty will determine how fast the enemies move and total number of bullets allowed
+        switch(difficultyIndex)
+        {
+            //easy
+            case 0:
+                this.speed = SPEED_EASY;
+                this.bulletLimit = BULLET_LIMIT_EASY;
+                break;
+                
+            //medium
+            case 1:
+                this.speed = SPEED_MEDIUM;
+                this.bulletLimit = BULLET_LIMIT_MEDIUM;
+                break;
+                
+            //hard
+            case 2:
+                this.speed = SPEED_HARD;
+                this.bulletLimit = BULLET_LIMIT_HARD;
+                break;
+                
+            //harder
+            case 3:
+                this.speed = SPEED_HARDER;
+                this.bulletLimit = BULLET_LIMIT_HARDER;
+                break;
+                
+            //hardest
+            default:
+                this.speed = SPEED_HARDEST;
+                this.bulletLimit = BULLET_LIMIT_HARDEST;
+                break;
+        }
+    }
+    
+    private double getSpeed()
+    {
+        return this.speed;
+    }
+    
+    private int getBulletLimit()
+    {
+        return this.bulletLimit;
     }
     
     /**
@@ -76,11 +147,11 @@ public final class Enemies implements IElement
             //calculate the x coordinate where the enemy should be
             if (movingEast())
             {
-                destinationX = (int)(player.getX() - (DEFAULT_MOVE_SPEED * updates));
+                destinationX = (int)(player.getX() - (getSpeed() * updates));
             }
             else
             {
-                destinationX = (int)(player.getX() + (DEFAULT_MOVE_SPEED * updates));
+                destinationX = (int)(player.getX() + (getSpeed() * updates));
             }
         }
         else
@@ -88,15 +159,24 @@ public final class Enemies implements IElement
             //calculate the x coordinate where the hero should be
             if (movingEast())
             {
-                destinationX = (int)(enemy.getX() + (DEFAULT_MOVE_SPEED * updates));
+                destinationX = (int)(enemy.getX() + (getSpeed() * updates));
             }
             else
             {
-                destinationX = (int)(enemy.getX() - (DEFAULT_MOVE_SPEED * updates));
+                destinationX = (int)(enemy.getX() - (getSpeed() * updates));
             }
         }
         
         return destinationX;
+    }
+    
+    /**
+     * Get the number of enemies
+     * @return the number of enemies
+     */
+    public int getCount()
+    {
+        return this.enemies.size();
     }
     
     /**
@@ -131,8 +211,14 @@ public final class Enemies implements IElement
                 //set location of bullet same as enemy
                 bullet.setLocation(enemies.get(i));
                 
-                //remove enemy
-                enemies.remove(i);
+                //take away health
+                enemies.get(i).deductHealth();
+                
+                if (!enemies.get(i).hasHealth())
+                {
+                    //remove enemy
+                    enemies.remove(i);
+                }
                 
                 //return true for collision
                 return true;
@@ -145,32 +231,62 @@ public final class Enemies implements IElement
     
     /**
      * Add enemies.
-     * @param x Start x-coordinates
+     * @param random Object used to make random decisions
+     * @param resources Object used to access resources
+     * @param window Where game play occurs
      * @param y Start y-coordinates
      * @param cols Total columns of enemies
      * @param rows Total rows of enemies
-     * @param random Object used to make random decisions
-     * @param resources Object used to access resources
+     * @param boss Are we adding boss(es)
      */
-    public void reset(final Random random, final Resources resources, final double x, final double y, final int cols, final int rows)
+    public void reset(final Random random, final Resources resources, final Rectangle window, final int cols, final int rows, final boolean boss)
     {
-        for (int col=0; col < cols; col++)
+        //clear list
+        enemies.clear();
+        
+        //where we will start adding enemies
+        final double startX, startY;
+        
+        if (boss)
         {
-            for (int row=0; row < rows; row++)
+            //set start coordinates
+            startX = window.x + (window.width / 2) - ((cols * Enemy.Type.Enemy1.width) / 2);
+            startY = window.y + (Enemy.Type.Enemy1.width / 2);
+        }
+        else
+        {
+            //set start coordinates
+            startX = window.x + (window.width / 2) - ((cols * (Enemy.Type.Enemy1.width/2)) / 2);
+            startY = window.y + (Enemy.Type.Enemy1.width / 3);
+        }
+        
+        for (int row=0; row < rows; row++)
+        {
+            //pick random type for the row
+            Enemy.Type type = Enemy.Type.values()[random.nextInt(Enemy.Type.values().length)];
+                
+            for (int col=0; col < cols; col++)
             {
-                //pick random type
-                Enemy.Type type = Enemy.Type.values()[random.nextInt(Enemy.Type.values().length)];
-                
-                //create new enemy and add to list
-                Enemy enemy = new Enemy(type, resources.getGameImage(type.getKey()));
-                
-                //set the location
-                enemy.setLocation(x + (col * enemy.getWidth()), y + (row * enemy.getHeight()));
-                
                 //add enemy to list
-                enemies.add(enemy);
+                add(type, resources, startX, startY, col, row, boss);
             }
         }
+    }
+    
+    private void add(final Enemy.Type type, final Resources resources, final double x, final double y, final int col, final int row, final boolean boss)
+    {
+        //create new enemy and add to list
+        Enemy enemy = new Enemy(type, resources.getGameImage(type.getKey()), boss);
+
+        //set the location
+        enemy.setLocation(x + (col * enemy.getWidth()), y + (row * enemy.getHeight()));
+
+        //if this is a boss set the health
+        if (boss)
+            enemy.setHealth(DEFAULT_BOSS_HEALTH);
+        
+        //add enemy to list
+        enemies.add(enemy);
     }
     
     /**
@@ -259,11 +375,11 @@ public final class Enemies implements IElement
     {
         for (Enemy enemy : enemies)
         {
-            enemy.setVelocityX(-DEFAULT_MOVE_SPEED);
+            enemy.setVelocityX(-getSpeed());
             
             //make sure the correct velocity is set
             if (movingEast())
-                enemy.setVelocityX(DEFAULT_MOVE_SPEED);
+                enemy.setVelocityX(getSpeed());
             
             //update enemy location/animation
             enemy.update(engine.getMain().getTime());
@@ -298,10 +414,18 @@ public final class Enemies implements IElement
         //was there a direction shift
         if (previous != movingEast())
         {
-            //move all enemies south
-            for (Enemy enemy : enemies)
+            //if the enemies are allowed to continue to move forward
+            if (forward)
             {
-                enemy.setY(enemy.getY() + (enemy.getHeight() / 4));
+                //move all enemies south
+                for (Enemy enemy : enemies)
+                {
+                    enemy.setY(enemy.getY() + (enemy.getHeight() / 4));
+
+                    //but make sure they do not go off the screen
+                    if (enemy.getY() > engine.getManager().getWindow().y + engine.getManager().getWindow().height - enemy.getHeight())
+                        forward = false;
+                }
             }
         }
         
@@ -309,13 +433,15 @@ public final class Enemies implements IElement
         if (!enemies.isEmpty())
         {
             //can an enemy fire a bullet
-            if (engine.getManager().getBullets().getBulletCount(Bullet.Type.EnemyFire) < BULLET_LIMIT)
+            if (engine.getManager().getBullets().getBulletCount(Bullet.Type.EnemyFire) < getBulletLimit())
             {
+                final int index = engine.getRandom().nextInt(enemies.size());
+                
                 //pick random enemy location
-                Point p = enemies.get(engine.getRandom().nextInt(enemies.size())).getPoint();
+                Point p = enemies.get(index).getPoint();
 
                 //add bullet
-                engine.getManager().getBullets().add(Bullet.Type.EnemyFire, p.x, p.y, engine.getResources());
+                engine.getManager().getBullets().add(Bullet.Type.EnemyFire, p.x, p.y, engine.getResources(), enemies.get(index).getId());
                 
                 //play sound effect
                 engine.getResources().playGameAudio(GameAudio.Keys.EnemyShoot);

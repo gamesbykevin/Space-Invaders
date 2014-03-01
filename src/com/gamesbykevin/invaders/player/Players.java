@@ -2,7 +2,6 @@ package com.gamesbykevin.invaders.player;
 
 import com.gamesbykevin.invaders.bullet.Bullet;
 import com.gamesbykevin.invaders.engine.Engine;
-import com.gamesbykevin.invaders.resources.GameImage;
 import com.gamesbykevin.invaders.shared.IElement;
 
 import java.awt.Graphics;
@@ -17,32 +16,55 @@ public final class Players implements IElement
     private List<Player> players;
     
     /**
+     * To detect death the bullet has to be so close to the ship.<br>
+     * This will be a fraction of the ship's width.
+     */
+    private final double DEATH_RATIO = .25;
+    
+    /**
      * Create a new instance of players in this game
      * @param image Our sprite sheet for the ship
+     * @param cpuImage Our sprite sheet for the cpu ship
      * @param window Area where game play occurs
+     * @param status Area where stats will be drawn
+     * @param numPlayers how many players are there
+     * @param lives how many lives the players are to have
      */
-    public Players(final Image image, final Rectangle window)
+    public Players(final Image image, final Image cpuImage, final Rectangle window, final Rectangle status, final int numPlayers, final int lives)
     {
         //create new list
         this.players = new ArrayList<>();
         
-        //create ship
-        //Player human = new Human(engine.getResources().getGameImage(GameImage.Keys.Ship));
+        //add human player to list
+        players.add(new Human(image));
         
-        //ship will be placed behind boundary
-        //human.setLocation(engine.getManager().getWindow().x + (engine.getManager().getWindow().width / 2), engine.getManager().getWindow().y + engine.getManager().getWindow().height - (human.getHeight() / 2));
+        //if more than 1 player the other(s) have to be cpu
+        if (numPlayers > 1)
+        {
+            //add cpu player to list
+            players.add(new Cpu(cpuImage));
+        }
         
-        //add player to list
-        //players.add(human);
+        //area separating each player
+        int eachWidth = ((status.width - 75) / numPlayers);
         
-        //create ship
-        Player cpu = new Cpu(image);
+        int x = 0;
         
-        //ship will be placed behind boundary
-        cpu.setLocation(window.x + (window.width / 2), window.y + window.height - (cpu.getHeight() / 2));
-        
-        //add player to list
-        players.add(cpu);
+        //set the defaults for the players
+        for (Player player : players)
+        {
+            //set the starting lives
+            player.setLives(lives);
+            
+            //set where the stats will be
+            player.setStatCoordinates(status.x + x, status.y + status.height - 5);
+            
+            //set the location behind a boundary
+            player.setLocation(window.x + (window.width / 2), window.y + window.height - (player.getHeight() / 2));
+            
+            //move x coordinate over
+            x += eachWidth;
+        }
     }
     
     @Override
@@ -56,6 +78,88 @@ public final class Players implements IElement
         
         players.clear();
         players = null;
+    }
+    
+    /**
+     * Remove all lives from the players since the game is over
+     */
+    public void killPlayers()
+    {
+        for (Player player : players)
+        {
+            //mark player as dead
+            player.setDead(true);
+            
+            //the player will have no more lives
+            player.setLives(0);
+        }
+    }
+    
+    /**
+     * Is the game over
+     * @return true if all of the players lives are gone, false otherwise
+     */
+    public boolean hasGameOver()
+    {
+        for (Player player : players)
+        {
+            if (player.hasLives())
+                return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Is the cpu's game over
+     * @return true if the cpu no longer has lives, false otherwise
+     */
+    public boolean hasCpuGameover()
+    {
+        for (Player player : players)
+        {
+            if (!player.isHuman() && !player.hasLives())
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Did the human win
+     * @return true if the human has more kills than the cpu, false otherwise
+     */
+    public boolean hasHumanWin()
+    {
+        int humanKills = 0, cpuKills = 0;
+        
+        for (Player player : players)
+        {
+            if (player.isHuman())
+            {
+                humanKills = player.getKills();
+            }
+            else
+            {
+                if (cpuKills <= humanKills)
+                    cpuKills = player.getKills();
+            }
+        }
+        
+        return (humanKills > cpuKills);
+    }
+    
+    public void creditKill(final long id)
+    {
+        for (Player player : players)
+        {
+            //not the correct player
+            if (player.getId() != id)
+                continue;
+            
+            //add kill
+            player.addKill();
+        }
     }
     
     /**
@@ -78,10 +182,13 @@ public final class Players implements IElement
             final double distance = player.getDistance(bullet);
             
             //if the bullet is so close to player we have collision
-            if (distance <= (player.getWidth() / 4))
+            if (distance <= (player.getWidth() * DEATH_RATIO))
             {
                 //mark player as dead
                 player.setDead(true);
+                
+                //deduct life
+                player.loseLife();
                 
                 //set the bullet to be where the ship is
                 bullet.setLocation(player);
@@ -99,9 +206,20 @@ public final class Players implements IElement
     {
         for (Player player : players)
         {
-            if (player != null && !player.isDead())
+            if (!player.isDead())
             {
                 player.update(engine);
+            }
+            else
+            {
+                if (player.hasLives())
+                {
+                    //mark as not dead
+                    player.setDead(false);
+                    
+                    //reset location
+                    player.setLocation(engine.getManager().getWindow().x + (engine.getManager().getWindow().width / 2), engine.getManager().getWindow().y + engine.getManager().getWindow().height - (player.getHeight() / 2));
+                }
             }
         }
     }
@@ -111,10 +229,16 @@ public final class Players implements IElement
     {
         for (Player player : players)
         {
-            if (player != null && !player.isDead())
-            {
+            if (!player.isDead())
                 player.render(graphics);
-            }
+        }
+    }
+    
+    public void renderStats(final Graphics graphics)
+    {
+        for (Player player : players)
+        {
+            player.renderStats(graphics);
         }
     }
 }
