@@ -429,8 +429,8 @@ public final class Enemies implements IElement
             }
         }
         
-        //make sure enemies exist
-        if (!enemies.isEmpty())
+        //make sure enemies exist and the game isn't over
+        if (!enemies.isEmpty() && !engine.getManager().getPlayers().hasGameOver())
         {
             //can an enemy fire a bullet
             if (engine.getManager().getBullets().getBulletCount(Bullet.Type.EnemyFire) < getBulletLimit())
